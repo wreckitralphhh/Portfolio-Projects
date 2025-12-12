@@ -1,5 +1,5 @@
 # There are 50,000 iterations in the raw file and that way too much to look at 
-# Let's assume we set divide the 50K into chunks and take a look at each "checkpoint"
+# Let's divide the 50K into chunks and take a look at each "checkpoint"
 # Let's say every "checkpoint" == 10K iterations and we will look at the 10Kth plot
 
 import pandas as pd 
@@ -9,36 +9,30 @@ import matplotlib.pyplot as plt
 #importing Path and using it doesn't work for some reason
 df = pd.read_csv(r"C:\Users\Ralph\Desktop\test_engineer_data.csv")
 
-#prints top of dataset, just making sure it arrive safely
+#prints top of dataset, just making sure it arrived safely
 print(df.head())
 
-# this will let us group the dataset, by iteration 
-groups = [g for _, g in df.groupby(df.index // 20)]
+#this will let us group the dataset, by iteration 
+groups = [g for _, g in df.groupby(df.index // 20)] #Every 20 rows, it's a new iteration number 
 group_indices = [0, 10000, 20000, 30000, 40000, 49999]  # the 5 groups
+group_idx_names = ['0 Iterations', '10000 Iterations', '20000 Iterations', '30000 Iterations', '40000 Iterations', '49999 Iterations']
+# print(groups[20000]['Iteration']) # I was just making sure it was grouped correctly
 
+# I locked the "relative time" of each test since I kept seeing that 8.13 seconds is the same duration of each test iteration all the way to 49999th 
+# This makes it easier to plot using the same x-axis 
+rel_time = groups[0]['Timestamp (s)']
+plt.figure(figsize=(12,5))
 
+for i, idx in enumerate(group_indices):
+    g = groups[idx].copy()
+    print(i)
+    print(idx)
+    encoder_motion = groups[idx]['Encoder (deg)']
+    plt.scatter(rel_time, encoder_motion)
+    plt.plot(rel_time, encoder_motion)
 
-def plot_all_groups():
-    fig, axes = plt.subplots(len(group_indices), 1, figsize=(10, 12), sharex=False)
-    for i, idx in enumerate(group_indices):
-        g = groups[idx].copy()
-        
-        # Convert timestamp to datetime if needed
-        g['Timestamp (s)'] = pd.to_datetime(g['Timestamp (s)'])
-
-        # Relative time
-        g['t_rel'] = (g['Timestamp (s)'] - g['Timestamp (s)'].iloc[0]).dt.total_seconds()
-        
-        axes[i].scatter(g['t_rel'], g['Encoder (deg)'], c='blue')
-        axes[i].plot(g['t_rel'], g['Encoder (deg)'], c='red', linewidth=1, label='Line')
-        axes[i].set_title(f'Group {idx}')
-        axes[i].set_ylabel('Encoder (deg)')
-        axes[i].grid(True)
-
-    axes[-1].set_xlabel('Relative Time (sec)')  # only the bottom plot gets an x-label
-
-    plt.tight_layout()
-    plt.show()
-
-if __name__ == "__main__":
-    plot_all_groups()
+plt.xlabel("Time Elapsed (sec)")
+plt.ylabel("Encoder Position (deg)")
+plt.legend(labels=group_idx_names, loc='center left', bbox_to_anchor=(1,0.5))
+plt.tight_layout()  #automatically adjust size based on legend that is outside the plot area
+plt.show() 
