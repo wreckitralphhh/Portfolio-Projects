@@ -56,7 +56,7 @@ def repeatability_analysis():
     variance = stat.variance(temp_list)
 
     print(f"Standard deviation at motion max: {std_dev} deg")
-    print(f"Variance at motion max: {variance} deg")
+    print(f"Variance at motion max: {variance}")
 
 def plot_data():
     # I locked the "relative time" of each test since I kept seeing that 8.13 seconds is the same duration of each test iteration all the way to 49999th 
